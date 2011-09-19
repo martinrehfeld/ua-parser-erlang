@@ -1,0 +1,8 @@
+%% -*- tab-width: 4;erlang-indent-level: 4;indent-tabs-mode: nil -*-
+%% ex: ts=4 sw=4 et
+{application, ua_agent,
+[
+  {description, "User Agent Parser"},
+  {vsn, "1.0.0"},
+  {modules, []}
+]}.
