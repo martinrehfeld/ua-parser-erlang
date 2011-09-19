@@ -1,12 +1,22 @@
 -module(ua_agent, [UA]).
 
 -define(REGEXP_TO_PLATFORM, [
-        {"iPod", "iPod"},
-        {"iPad", "iPad"},
-        {"iPhone", "iPhone"},
-        {"windows", "Windows"},
-        {"os x \\d+[._]\\d+", "OS X"},
-        {"linux", "Linux"}
+        {"iPod"              , "iPod"},
+        {"iPad"              , "iPad"},
+        {"iPhone"            , "iPhone"},
+        {"Windows"           , "Windows"},
+        {"OS X \\d+[._]\\d+" , "OS X"},
+        {"Android"           , "Android"},
+        {"Linux"             , "Linux"}
+    ]).
+
+-define(REGEXP_TO_BROWSER, [
+        {"Konqueror" , "Konqueror"},
+        {"Chrome"    , "Chrome"},
+        {"Safari"    , "Safari"},
+        {"MSIE"      , "IE"},
+        {"Opera"     , "Opera"},
+        {"Firefox"   , "Firefox"}
     ]).
 
 -ifdef(TEST).
@@ -15,7 +25,16 @@
 -export([platform/0]).
 -endif.
 
-get_ua() -> UA.
+browser() ->
+    browser(?REGEXP_TO_BROWSER).
+
+browser([{Regexp, Browser}|T]) ->
+    case re:run(UA, Regexp, [global, caseless]) of
+        {match, _} -> Browser;
+        _          -> browser(T)
+    end;
+
+browser([]) -> undefined.
 
 platform() ->
     platform(?REGEXP_TO_PLATFORM).
@@ -26,5 +45,4 @@ platform([{Regexp, OS}|T]) ->
         _          -> platform(T)
     end;
 
-platform([]) ->
-    undefined.
+platform([]) -> undefined.
