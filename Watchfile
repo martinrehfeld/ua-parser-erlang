@@ -1,0 +1,43 @@
+RED   = "\x1b[31m" unless defined?(RED)
+GREEN = "\x1b[32m" unless defined?(GREEN)
+RESET = "\x1b[0m" unless defined?(RESET)
+
+FILES = [] unless defined?(FILES)
+
+watch('(src|test)/.*\.erl') do |md|
+    FILES << file = md[0].gsub('src', 'ebin').gsub('.erl','.beam')
+
+    compile(file)
+
+    if $?.success?
+        FILES.delete(file)
+        FILES.each do |f|
+            compile(f)
+        end
+        puts GREEN + "Success compiling `#{md[0]}'" + RESET
+        cmd("rake test")
+    else
+        puts RED + "Error compiling `#{md[0]}'" + RESET
+    end
+end
+
+watch('include/.*\.hrl') do |md|
+    cmd("rake clean")
+    cmd("rake compile")
+
+    if $?.success?
+        puts GREEN + "Success compiling `#{md[0]}'" + RESET
+        cmd("rake test")
+    else
+        puts RED + "Error compiling `#{md[0]}'" + RESET
+    end
+end
+
+def compile(file)
+    cmd "rake #{file}"
+end
+
+def cmd(command)
+    puts command
+    system "./bin/colorize #{command}"
+end

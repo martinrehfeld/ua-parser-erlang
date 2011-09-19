@@ -1,0 +1,51 @@
+#!/usr/bin/env ruby
+
+command     = ARGV.join(' ')
+
+RED         = 31
+GREEN       = 32
+YELLOW      = 33
+BOLD_YELLOW = "1;33"
+GREY        = 37
+MAGENTA     = 35
+
+BG_YELLOW   = 43
+BG_BLUE     = 44
+BG_RED      = 41
+BG_MAGENTA  = 45
+
+def set_color(fg, bg)
+  print "\x1b[#{fg}m" if fg
+  print "\x1b[#{bg}m" if bg
+end
+
+def reset_color
+  print "\x1b[0m"
+end
+
+def print_color(txt, fg, bg = nil)
+  set_color(fg, bg)
+  print txt.chomp
+  reset_color
+  print "\n" if txt =~ /\n$/
+end
+
+output      = %x{#{command}}
+exit_status = $?.exitstatus
+
+output.each_line do |line|
+  case line
+  when /Warning/ then print_color(line, YELLOW)
+  when /\*failed\*/, /context setup failed/, /error/i, /function (.*) undefined/ then print_color(line, RED)
+  when /={3,}/ then print_color(line, GREEN)
+  when /Failed: (\d+)\.  Skipped: (\d+)\.  Passed: (\d+)\./ then print_color("Failed: #{$1}.  ", RED); print_color("Skipped: #{$2}.  ", YELLOW); print_color("Passed: #{$3}\n", GREEN)
+  when /One or more tests were cancelled./ then print_color(line, YELLOW)
+  when /One or more eunit tests failed./ then print_color(line, RED)
+  when /There were no tests to run./ then print_color(line, MAGENTA)
+  when /tests? passed./i then print_color(line, GREEN)
+  else
+    print line
+  end
+end
+
+exit exit_status
