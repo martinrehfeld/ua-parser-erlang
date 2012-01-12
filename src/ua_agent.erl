@@ -22,7 +22,7 @@
 -ifdef(TEST).
 -compile(export_all).
 -else.
--export([platform/0]).
+-export([platform/0, browser/0]).
 -endif.
 
 browser() ->
